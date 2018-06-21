@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package rnn_ur5;
+message Sequence{
+
+	message EndPoints {
+		repeated double initial_pose = 1;
+		repeated double final_pose = 2;
+	}
+
+	message Thetas {
+		repeated double theta_values = 1;
+	}
+	
+	message XYZ {
+		repeated double poses = 1;
+	}
+
+
+	required EndPoints ends = 1;
+	repeated Thetas thetas = 2;
+	repeated XYZ xyz = 3;
+}
