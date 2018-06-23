@@ -112,18 +112,20 @@ def get_poses(joint = False):
 def random_valid_end_point_generator():
     global waypoints,group_arm
     fraction = 0 
+    final_ee_pose=geometry_msgs.msg.Pose()
     while(fraction<0.8):
         try:
             del waypoints[1]
         except IndexError:
             print "not yet"
-        waypoints.append(group_arm.get_random_pose().pose)
+        final_ee_pose=group_arm.get_random_pose().pose
+        waypoints.append(final_ee_pose)
         (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
-    return plan,fraction
+    return plan,fraction,final_ee_pose
 
 def main():
-    global group_arm,waypoints,plan,fraction
-    num_examples = 2
+    global group_arm,waypoints,plan,fraction,end_point
+    num_examples = 100
     data = Sequence()
     valid_count =0
     for i in range(num_examples):
@@ -137,11 +139,8 @@ def main():
             final_ee_pose = geometry_msgs.msg.Pose()
             random_end_point = random_valid_end_point_generator()
 
-            (plan,fraction)=random_valid_end_point_generator()
-            
+            (plan,fraction,final_ee_pose)=random_valid_end_point_generator()
             print "fraction: "+str(fraction)
-            ##Check for successful plan         
-            valid_count+=1
             #get joint values:
             path_length = len(plan.joint_trajectory.points)
             intermediate_joint_values = [plan.joint_trajectory.points[j].positions for j in range(path_length)]
@@ -153,7 +152,7 @@ def main():
             print len(intermediate_ee_poses)
             ##now i have all path-joint and ee values. Time to format data and store it.
             data.ends.initial_pose.extend([initial_ee_pose.position.x,initial_ee_pose.position.y,initial_ee_pose.position.z])
-            data.ends.final_pose.extend(random_end_point)
+            data.ends.final_pose.extend([final_ee_pose.position.x,final_ee_pose.position.y,final_ee_pose.position.z])
             [data.thetas.add().theta_values.extend(joints) for joints in intermediate_joint_values] 
             [data.xyz.add().poses.extend([pos.x,pos.y,pos.z]) for pos in intermediate_ee_poses]
             print data.ends.initial_pose
@@ -161,6 +160,7 @@ def main():
             f = open(str(file_name%valid_count), "wb")
             f.write(data.SerializeToString(data))
             f.close()
+            valid_count+=1
                     
 if __name__ == '__main__':
 
