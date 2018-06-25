@@ -55,6 +55,7 @@ import numpy as np
 from keras import backend as K
 import os,os.path
 from data_pb2 import Sequence
+from prep_data import *
 
 
 home="/home/shashank/catkin_ws/src/rnn_ur5/dataset/"
@@ -75,15 +76,17 @@ file_name="sequence_$05d"
 inputs = tf.placeholder(dtype=tf.float32,shape=[None,time_steps,num_features],name="input")
 joint_labels = tf.placeholder(dtype=tf.float32,shape=[None,time_steps,num_features],name="joint_labels")
 
-def prep_data():
-    data=Sequence()
-    for i in range(num_sequences):
-        data.Clear()
-        f=open(str(file_name%i),"rb")
-        data.ParseFromString(f.read())
-        print data.ends.initial_pose
-        print data.ends.final_pose
-        f.close()
+# def prep_data():
+#     data=Sequence()
+#     for i in range(num_sequences):
+#         data.Clear()
+#         f=open(str(file_name%i),"rb")
+#         data.ParseFromString(f.read())
+#         print data.ends.initial_pose
+#         print data.ends.final_pose
+#         ##for now lets not use the ends attribute and treat last and first elements of thetas and xyz as ends
+        
+#         f.close()
     
 
 with tf.name_scope("MultiCell_RNN"):

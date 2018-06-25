@@ -81,6 +81,7 @@ import sys,os
 home="/home/shashank/catkin_ws/src/rnn_ur5/dataset/"
 file_name = home + 'sequence_%05d'
  
+##TODO :
 def call_compute_fk_service(joints):
     rospy.wait_for_service('compute_fk')
     try:
@@ -97,10 +98,6 @@ def call_compute_fk_service(joints):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
-
-
-
-
 def get_poses(joint = False):
     global group_arm  
     if joint:
@@ -110,21 +107,23 @@ def get_poses(joint = False):
     return  value
 
 def random_valid_end_point_generator():
-    global waypoints,group_arm
+    global waypoints,group_arm,initial_ee_pose
     fraction = 0 
     final_ee_pose=geometry_msgs.msg.Pose()
-    while(fraction<0.8):
+    while(fraction!=1):
         try:
             del waypoints[1]
+            print len(waypoints)
         except IndexError:
             print "not yet"
         final_ee_pose=group_arm.get_random_pose().pose
+        final_ee_pose.orientation=initial_ee_pose.orientation
         waypoints.append(final_ee_pose)
         (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
     return plan,fraction,final_ee_pose
 
 def main():
-    global group_arm,waypoints,plan,fraction,end_point
+    global group_arm,waypoints,plan,fraction,end_point,initial_ee_pose
     num_examples = 100
     data = Sequence()
     valid_count =0

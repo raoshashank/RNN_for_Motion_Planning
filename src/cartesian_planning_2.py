@@ -46,42 +46,41 @@ wpose = geometry_msgs.msg.Pose()
 ##0.673728
 ##0.186072
 ##0.876376
-# wpose.position.x =  -0.331715191494
-# wpose.position.y =  -0.255530105073
-# wpose.position.z =   1.40340737585
-# wpose.orientation.x = 0.0401904438092
-# wpose.orientation.y = 0.983963015316
-# wpose.orientation.z = -0.172781621015
-# wpose.orientation.w = 0.0186554055213
-# waypoints.append(copy.deepcopy(wpose))
-# (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
-# print fraction
+wpose.position.x = -0.516393634674
+wpose.position.y = 0.355826552764
+wpose.position.z = 0.176156007518
+
+
+
+wpose.orientation.x = group_arm.get_current_pose().pose.orientation.x
+wpose.orientation.y = group_arm.get_current_pose().pose.orientation.y
+wpose.orientation.z = group_arm.get_current_pose().pose.orientation.z
+wpose.orientation.w = group_arm.get_current_pose().pose.orientation.w
+waypoints.append(copy.deepcopy(wpose))
+(plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
+print fraction
+for i in plan.joint_trajectory.points:
+    print str(i.time_from_start.secs)+"."+str(i.time_from_start.nsecs)
 # joint_state = GetPositionFK()
 # joint_state.robot = robot
 # fk_link_names = group_arm.get_joints()
 #wpose2=group_arm.get_random_pose()
 
-fraction=0
-while(fraction!=1):
-    try:
-        del waypoints[1]
-    except IndexError:
-        print "not yet"
-    random_pose = group_arm.get_random_pose().pose
-    random_pose.orientation = intial_pose.orientation
-    waypoints.append(random_pose)
-    (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
+# fraction=0
+# while(fraction!=1):
+#     try:
+#         del waypoints[1]
+#     except IndexError:
+#         print "not yet"
+#     random_pose = group_arm.get_random_pose().pose
+#     random_pose.orientation = intial_pose.orientation
+#     waypoints.append(random_pose)
+#     (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
 
-
-
-
-print fraction
-print "~~~~~~~"
-print call_compute_fk_service(plan.joint_trajectory.points[0].positions)
-print intial_pose
-print call_compute_fk_service(plan.joint_trajectory.points[-1].positions)
-print random_pose
-print "~~"
+# print random_pose
+# print "~~"
+# print intial_pose
+# print fraction
 #joint_state.fk_link_names = 
 
 
@@ -91,11 +90,12 @@ group_arm.set_goal_orientation_tolerance(0.01)
 group_arm.set_goal_position_tolerance(0.01)
 
 group_arm.plan()
-print "GOING"
+print "GOING BRO"
 rospy.sleep(5)
 group_arm.go(wait=True)
+#rospy.sleep(5)
 group_arm.execute(plan,wait=True)
-print "GONE"
+print "GONE BRO"
 
 #rospy.sleep(5)
 #group_arm.plan()
