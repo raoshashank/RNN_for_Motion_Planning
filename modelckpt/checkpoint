@@ -1,0 +1,6 @@
+model_checkpoint_path: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights900.ckpt"
+all_model_checkpoint_paths: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights500.ckpt"
+all_model_checkpoint_paths: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights600.ckpt"
+all_model_checkpoint_paths: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights700.ckpt"
+all_model_checkpoint_paths: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights800.ckpt"
+all_model_checkpoint_paths: "/home/shashank/catkin_ws/src/rnn_ur5/modelckpt/weights900.ckpt"

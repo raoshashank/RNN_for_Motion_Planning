@@ -113,9 +113,9 @@ def random_valid_end_point_generator():
     while(fraction!=1):
         try:
             del waypoints[1]
-            print len(waypoints)
+            #print len(waypoints)
         except IndexError:
-            print "not yet"
+            pass
         final_ee_pose=group_arm.get_random_pose().pose
         final_ee_pose.orientation=initial_ee_pose.orientation
         waypoints.append(final_ee_pose)
@@ -124,10 +124,10 @@ def random_valid_end_point_generator():
 
 def main():
     global group_arm,waypoints,plan,fraction,end_point,initial_ee_pose
-    num_examples = 100
+    num_examples = 1000
     data = Sequence()
     valid_count =0
-    for i in range(num_examples):
+    for i in range(1000,2000):
             data.Clear()
             waypoints=[]
             initial_ee_pose = get_poses()
@@ -139,27 +139,27 @@ def main():
             random_end_point = random_valid_end_point_generator()
 
             (plan,fraction,final_ee_pose)=random_valid_end_point_generator()
-            print "fraction: "+str(fraction)
+            #print "fraction: "+str(fraction)
             #get joint values:
             path_length = len(plan.joint_trajectory.points)
             intermediate_joint_values = [plan.joint_trajectory.points[j].positions for j in range(path_length)]
-            print "~~~~~~~~~~~~~joint plan~~~~~~~~~~~~~~~~~~~"
-            print len(intermediate_joint_values)
+            #print "~~~~~~~~~~~~~joint plan~~~~~~~~~~~~~~~~~~~"
+            #print len(intermediate_joint_values)
             intermediate_ee_poses = []
-            print "~~~~~~~~~~~~~ee plan~~~~~~~~~~~~~~~~~~~"
+            #print "~~~~~~~~~~~~~ee plan~~~~~~~~~~~~~~~~~~~"
             [intermediate_ee_poses.append(call_compute_fk_service(joints)) for joints in intermediate_joint_values]
-            print len(intermediate_ee_poses)
+            #print len(intermediate_ee_poses)
             ##now i have all path-joint and ee values. Time to format data and store it.
             data.ends.initial_pose.extend([initial_ee_pose.position.x,initial_ee_pose.position.y,initial_ee_pose.position.z])
             data.ends.final_pose.extend([final_ee_pose.position.x,final_ee_pose.position.y,final_ee_pose.position.z])
             [data.thetas.add().theta_values.extend(joints) for joints in intermediate_joint_values] 
             [data.xyz.add().poses.extend([pos.x,pos.y,pos.z]) for pos in intermediate_ee_poses]
-            print data.ends.initial_pose
-            print data.ends.final_pose
-            f = open(str(file_name%valid_count), "wb")
+            #print data.ends.initial_pose
+            #print data.ends.final_pose
+            f = open(str(file_name%i), "wb")
             f.write(data.SerializeToString(data))
             f.close()
-            valid_count+=1
+            print i
                     
 if __name__ == '__main__':
 
