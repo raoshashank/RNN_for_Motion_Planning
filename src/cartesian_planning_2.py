@@ -11,6 +11,11 @@ from moveit_msgs.srv import GetPositionFKResponse
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import RobotState
 from std_msgs.msg import Header
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+
+#%matplotlib inline   
+
 def call_compute_fk_service(joints):
     rospy.wait_for_service('compute_fk')
     try:
@@ -23,11 +28,11 @@ def call_compute_fk_service(joints):
         rs.joint_state.name = jointNames
         rs.joint_state.position = jointPositions
         ee = moveit_fk(header,fk_link,rs)
-        print "From Service: "
         return  ee.pose_stamped[0].pose.position 
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
         
+
 
 moveit_commander.roscpp_initializer.roscpp_initialize(sys.argv)
 rospy.init_node('cartesian_planning_node', anonymous=True)
@@ -46,21 +51,49 @@ wpose = geometry_msgs.msg.Pose()
 ##0.673728
 ##0.186072
 ##0.876376
-wpose.position.x = -0.516393634674
-wpose.position.y = 0.355826552764
-wpose.position.z = 0.176156007518
 
-
+wpose.position.x = 0.60331
+wpose.position.y = 0.42961
+wpose.position.z = 0.70924
 
 wpose.orientation.x = group_arm.get_current_pose().pose.orientation.x
 wpose.orientation.y = group_arm.get_current_pose().pose.orientation.y
 wpose.orientation.z = group_arm.get_current_pose().pose.orientation.z
 wpose.orientation.w = group_arm.get_current_pose().pose.orientation.w
 waypoints.append(copy.deepcopy(wpose))
-(plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
-print fraction
-for i in plan.joint_trajectory.points:
-    print str(i.time_from_start.secs)+"."+str(i.time_from_start.nsecs)
+# (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
+group_arm.clear_pose_targets()
+group_arm.set_pose_target(wpose)
+
+group_arm.set_goal_orientation_tolerance(0.01)
+group_arm.set_goal_position_tolerance(0.01)
+
+plan1=group_arm.plan()
+print "GOING"
+rospy.sleep(5)
+group_arm.go(wait=True)
+#group_arm.execute(plan,wait=True)
+print "GONE"
+
+# ee_way=[]
+# for i in plan.joint_trajectory.points:
+#     j=call_compute_fk_service(i.positions)
+#     ee_way.append([j.x,j.y,j.z]) 
+
+
+
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+# zdata = [i[2] for i in ee_way]
+# xdata = [i[0] for i in ee_way]
+# ydata = [i[1] for i in ee_way]
+
+# print "plotting"
+# ax.scatter3D(xdata, ydata, zdata, cmap='Greens')
+# plt.show()
+
+#for i in plan.joint_trajectory.points:
+#    print str(i.time_from_start.secs)+"."+str(i.time_from_start.nsecs)
 # joint_state = GetPositionFK()
 # joint_state.robot = robot
 # fk_link_names = group_arm.get_joints()
@@ -86,9 +119,7 @@ for i in plan.joint_trajectory.points:
 
 #print plan
 # print "Execution"
-group_arm.set_goal_orientation_tolerance(0.01)
-group_arm.set_goal_position_tolerance(0.01)
-
+'''
 group_arm.plan()
 print "GOING BRO"
 rospy.sleep(5)
@@ -96,7 +127,7 @@ group_arm.go(wait=True)
 #rospy.sleep(5)
 group_arm.execute(plan,wait=True)
 print "GONE BRO"
-
+'''
 #rospy.sleep(5)
 #group_arm.plan()
 # # print waypoints

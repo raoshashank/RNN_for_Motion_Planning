@@ -51,7 +51,7 @@ def prep_data(num_cells):
         j=0;t=0;temp_inputs=[]
         [temp_inputs.append(np.array([j for j in t.poses])) for t in data.xyz]                                                          
         t=[]
-        [t.append(np.append(r,temp_inputs[-1])) for r in temp_inputs]
+        [t.append(np.append(r,np.append(temp_inputs[-1],temp_inputs[0]))) for r in temp_inputs]        
         t=np.expand_dims(t,0).tolist()
         inputs = t+inputs
         temp_labels=[]
@@ -73,5 +73,65 @@ def prep_data(num_cells):
     print np.shape(inputs)
     print np.shape(labels)
     print np.shape(initial_states)
+
+    
+    #TESTING
+    labels=inputs[:,:,3:]
+    labels=np.roll(labels,-1,1)
+    labels[:,-1,:]=np.zeros([3])
+
+    #TESTING
     return inputs,labels,initial_states#max_len
-  
+
+
+def prep_data2(num_cells):
+    global inputs,labels,initial_states,temp_inputs
+    max_len = 0
+    data=Sequence()
+    for i in range(num_sequences):
+        data.Clear()
+        thetas=[]
+        xyz=[] #shape : sequence_length *   
+        data.Clear()
+        f=open(str(file_name%i),"rb")
+        data.ParseFromString(f.read())
+        
+        th=[]
+        
+        for t in data.thetas:
+            th.append([j for j in t.theta_values])
+        
+        j=0;t=0;temp_inputs=[]
+        [temp_inputs.append(np.array([j for j in t.poses])) for t in data.xyz]                                                          
+        t=[]
+        [t.append(np.append(r,np.append(temp_inputs[-1],temp_inputs[0]))) for r in temp_inputs]        
+        t=np.expand_dims(t,0).tolist()
+        inputs = t+inputs
+        temp_labels=[]
+        [temp_labels.append(np.array([j for j in t.theta_values])) for t in data.thetas]                                                         
+        temp_labels=np.expand_dims(temp_labels,0).tolist()
+        labels = temp_labels+labels
+    max_len=0
+    
+    ##padding
+    for i in inputs:
+        if(max_len<np.shape(i)[0]):
+            max_len = np.shape(i)[0]
+    inputs=[np.pad(i,[(0,max_len-np.shape(i)[0]),(0,0)],mode='constant') for i in inputs]
+    labels=[np.pad(i,[(0,max_len-np.shape(i)[0]),(0,0)],mode='constant') for i in labels]
+    t=np.zeros([num_cells,2,num_sequences,6])
+    t[0,0,:,:] = initial_states
+    initial_states = t
+
+    print np.shape(inputs)
+    print np.shape(labels)
+    print np.shape(initial_states)
+
+    
+    #TESTING
+    labels=inputs[:,:,3:]
+    labels=np.roll(labels,-1,1)
+    labels[:,-1,:]=np.zeros([3])
+
+    #TESTING
+    return inputs,labels,initial_states#max_len

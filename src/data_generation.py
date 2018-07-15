@@ -78,7 +78,7 @@ import sys,os
          ]
      ]
 '''
-home="/home/shashank/catkin_ws/src/rnn_ur5/dataset/"
+home="/home/shashank/catkin_ws/src/rnn_ur5/dataset2/"
 file_name = home + 'sequence_%05d'
  
 ##TODO :
@@ -98,19 +98,31 @@ def call_compute_fk_service(joints):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
-def get_poses(joint = False):
-    global group_arm  
+def get_poses(joint,group_arm):
     if joint:
         value =group_arm.get_current_joint_values() 
     else:
         value = group_arm.get_current_pose().pose
     return  value
 
-def random_valid_end_point_generator():
-    global waypoints,group_arm,initial_ee_pose
+def random_valid_end_point_generator():#waypoints,group_arm)#initial_ee_pose):
+    global initial_ee_pose,set,fail
+    count=0
     fraction = 0 
+    fail_=False
     final_ee_pose=geometry_msgs.msg.Pose()
     while(fraction!=1):
+        count+=1
+        #print "count"+str(count)
+        #print "set" + str(set)
+        if set == True and count>70:
+            print "Failed from new point, back to home"
+            fail+=1
+            initial_ee_pose = get_poses(False,group_arm)
+            waypoints[0] = initial_ee_pose
+            count=0
+            set=False
+            fail_=True
         try:
             del waypoints[1]
             #print len(waypoints)
@@ -120,25 +132,29 @@ def random_valid_end_point_generator():
         final_ee_pose.orientation=initial_ee_pose.orientation
         waypoints.append(final_ee_pose)
         (plan, fraction) = group_arm.compute_cartesian_path(waypoints, 0.01, 0.0)
+    set=False
+
+    #if fail_:
+    #    print "Fail"
+
     return plan,fraction,final_ee_pose
 
+
+
 def main():
-    global group_arm,waypoints,plan,fraction,end_point,initial_ee_pose
-    num_examples = 1000
+    global group_arm,waypoints,plan,fraction,end_point,initial_ee_pose,set,fail
+    num_examples = 5000
     data = Sequence()
     valid_count =0
-    for i in range(1000,2000):
+    initial_ee_pose = get_poses(False,group_arm)
+    set=False
+    fail=0
+    for i in range(2286,4000):
             data.Clear()
-            waypoints=[]
-            initial_ee_pose = get_poses()
-            initial_joint_angles = get_poses(True)
-            
+            waypoints=[]        
             waypoints.append(initial_ee_pose)
-
             final_ee_pose = geometry_msgs.msg.Pose()
-            random_end_point = random_valid_end_point_generator()
-
-            (plan,fraction,final_ee_pose)=random_valid_end_point_generator()
+            (plan,fraction,final_ee_pose)=random_valid_end_point_generator()#waypoints,group_arm)#,initial_ee_pose)
             #print "fraction: "+str(fraction)
             #get joint values:
             path_length = len(plan.joint_trajectory.points)
@@ -159,10 +175,18 @@ def main():
             f = open(str(file_name%i), "wb")
             f.write(data.SerializeToString(data))
             f.close()
+            
+            if set==False:
+                initial_ee_pose=final_ee_pose
+                #print "set \n\n"
+                set=True
+            
             print i
-                    
-if __name__ == '__main__':
+    print "Out of {} waypoints, {} were created from home position".format(i,fail)
+                      
 
+
+if __name__ == '__main__':
     global group_arm,current_joint_values
     current_joint_values = JointState()
     moveit_commander.roscpp_initializer.roscpp_initialize(sys.argv)
@@ -174,6 +198,5 @@ if __name__ == '__main__':
     group_arm = moveit_commander.MoveGroupCommander("manipulator")
     group_arm.set_planner_id("RRTConnectkConfig")
     main()
-    moveit_commander.os._exit(0)
     
-
+    moveit_commander.os._exit(0)

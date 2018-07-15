@@ -1,0 +1,6 @@
+model_checkpoint_path: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights19.ckpt"
+all_model_checkpoint_paths: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights15.ckpt"
+all_model_checkpoint_paths: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights16.ckpt"
+all_model_checkpoint_paths: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights17.ckpt"
+all_model_checkpoint_paths: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights18.ckpt"
+all_model_checkpoint_paths: "/home/vibhu/shashank_tensorflow/rnn_ur5/modelckpt/weights19.ckpt"
